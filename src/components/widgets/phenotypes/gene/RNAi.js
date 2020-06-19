@@ -1,13 +1,10 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 
-const RNAi = ({ values }) => {
+const RNAi = ({ rObj }) => {
   const useStyles = makeStyles({
     cell: {
-      '& .rnai:not(:last-child)': {
-        marginBottom: '20px',
-      },
-      '& .rnai div:not(:first-child)': {
+      '& div:not(:first-child)': {
         paddingLeft: '50px',
       },
     },
@@ -35,6 +32,13 @@ const RNAi = ({ values }) => {
         return (
           <>
             <b>paper: </b>
+            {value.label}
+          </>
+        )
+      case 'Paper_evidence':
+        return (
+          <>
+            <b>Paper evidence: </b>
             {value.label}
           </>
         )
@@ -70,16 +74,12 @@ const RNAi = ({ values }) => {
 
   return (
     <div className={classes.cell}>
-      {values.map((detail, idx) => (
-        <div key={idx} className='rnai'>
-          <div>
-            <b>RNAi: </b>
-            {detail.text.label}
-          </div>
-          {Object.entries(detail.evidence).map(([key, value], idx2) => (
-            <div key={idx2}>{displayRNAi(key, value)}</div>
-          ))}
-        </div>
+      <div>
+        <b>RNAi: </b>
+        {rObj.text.label}
+      </div>
+      {Object.entries(rObj.evidence).map(([key, value], idx) => (
+        <div key={idx}>{displayRNAi(key, value)}</div>
       ))}
     </div>
   )

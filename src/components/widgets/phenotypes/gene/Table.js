@@ -93,6 +93,7 @@ const GlobalFilter = ({ globalFilter, setGlobalFilter }) => {
 }
 
 const Table = ({ columns, data, tableType }) => {
+  console.log(data)
   const classes = useStyles()
 
   const sortTypes = useMemo(
@@ -383,7 +384,8 @@ const Table = ({ columns, data, tableType }) => {
       filterTypes,
       defaultColumn,
       globalFilter: selectGlobalFilter(tableType),
-      initialState: { pageIndex: 0 },
+      // initialState: { pageIndex: 0 },
+      initialState: { pageIndex: 0, pageSize: 100 },
     },
     useBlockLayout,
     useFilters,

@@ -10,38 +10,31 @@ const Phenotype = ({ WBid, tableType }) => {
   const [data, setData] = useState([])
 
   useEffect(() => {
-    loadData(WBid, tableType).then((json) => setData(json.data))
+    loadData(WBid, tableType, true).then((json) => setData(json.data))
   }, [WBid, tableType])
 
   const showEntities = (value) => {
     if (value === null) {
       return 'N/A'
     } else {
-      return <Entity values={value} />
+      return <Entity eObj={value} />
     }
   }
 
   const showEvidence = (value) => {
-    if (value.Allele && value.RNAi) {
-      return (
-        <>
-          <div
-            style={{
-              marginBottom: '20px',
-            }}
-          >
-            <Allele values={value.Allele} />
-          </div>
-          <RNAi values={value.RNAi} />
-        </>
-      )
-    } else if (value.Allele) {
-      return <Allele values={value.Allele} />
-    } else if (value.RNAi) {
-      return <RNAi values={value.RNAi} />
-    } else {
-      return <Overexpression values={value} />
+    if (value.Allele) {
+      return <Allele aObj={value.Allele} />
     }
+    if (value.RNAi) {
+      return <RNAi rObj={value.RNAi} />
+    } else {
+      console.error('hogehoge!!')
+      return null
+    }
+    // rest-stagingの"Overexpression"用APIは今のところありません
+    // else {
+    //   return <Overexpression values={value} />
+    // }
   }
 
   const columns = useMemo(
