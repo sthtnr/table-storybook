@@ -4,9 +4,11 @@ import {
   useBlockLayout,
   useFilters,
   useGlobalFilter,
-  usePagination,
+  useGroupBy,
   useResizeColumns,
   useSortBy,
+  useExpanded,
+  usePagination,
   useTable,
 } from 'react-table'
 import { makeStyles } from '@material-ui/core/styles'
@@ -36,7 +38,13 @@ const useStyles = makeStyles({
     '& th:last-child,td:last-child': {
       borderRight: 0,
     },
-    '& tbody tr:nth-child(even)': {
+    '& tbody tr .is_grouped,tbody tr .is_aggregated': {
+      backgroundColor: '#dedede',
+    },
+    '& tbody tr .is_placeholder': {
+      backgroundColor: '#d3d6ff',
+    },
+    '& tbody tr .is_other': {
       backgroundColor: '#e2e5ff',
     },
     '& th .resizer': {
@@ -63,9 +71,15 @@ const useStyles = makeStyles({
   displayed_data_info: {
     textAlign: 'right',
     marginBottom: '5px',
+    '& span': {
+      marginRight: '10px',
+    },
   },
   container: {
     display: 'inline-block',
+  },
+  xxxxx: {
+    background: 'red',
   },
 })
 
@@ -359,6 +373,31 @@ const Table = ({ columns, data, tableType }) => {
     }
   }
 
+  const getDefaultExpandedRows = (data, threshold) => {
+    const defaultExpandedRows = {}
+    const defaultHidRows = {}
+
+    data.forEach((d) => {
+      const key = `phenotype.label:${d.phenotype.label}`
+      if (defaultHidRows[key]) {
+        defaultHidRows[key] = ++defaultHidRows[key]
+      } else {
+        defaultHidRows[key] = 1
+      }
+    })
+
+    data.forEach((d) => {
+      const key = `phenotype.label:${d.phenotype.label}`
+      if (defaultHidRows[key] < threshold) {
+        defaultExpandedRows[key] = true
+      } else {
+        defaultExpandedRows[key] = false
+      }
+    })
+
+    return defaultExpandedRows
+  }
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -385,13 +424,20 @@ const Table = ({ columns, data, tableType }) => {
       defaultColumn,
       globalFilter: selectGlobalFilter(tableType),
       // initialState: { pageIndex: 0 },
-      initialState: { pageIndex: 0, pageSize: 100 },
+      initialState: {
+        pageIndex: 0,
+        pageSize: 100,
+        groupBy: ['phenotype.label'],
+        expanded: getDefaultExpandedRows(data, 10),
+      },
     },
     useBlockLayout,
     useFilters,
     useGlobalFilter,
     useResizeColumns,
+    useGroupBy,
     useSortBy,
+    useExpanded,
     usePagination
   )
 
@@ -442,7 +488,32 @@ const Table = ({ columns, data, tableType }) => {
             return (
               <tr {...row.getRowProps()}>
                 {row.cells.map((cell) => {
-                  return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                  return (
+                    <td
+                      {...cell.getCellProps()}
+                      className={
+                        cell.isGrouped
+                          ? 'is_grouped'
+                          : cell.isAggregated
+                          ? 'is_aggregated'
+                          : cell.isPlaceholder
+                          ? 'is_placeholder'
+                          : 'is_other'
+                      }
+                    >
+                      <div>
+                        {cell.isGrouped ? (
+                          <div {...row.getToggleRowExpandedProps()}>
+                            {cell.render('Cell')} ({row.subRows.length})
+                          </div>
+                        ) : cell.isAggregated ? (
+                          <div>{cell.render('Aggregated')}</div>
+                        ) : cell.isPlaceholder ? null : (
+                          <div>{cell.render('Cell')}</div>
+                        )}
+                      </div>
+                    </td>
+                  )
                 })}
               </tr>
             )

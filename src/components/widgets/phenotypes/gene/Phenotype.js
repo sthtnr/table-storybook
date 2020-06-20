@@ -3,14 +3,16 @@ import Table from './Table'
 import Allele from './Allele'
 import RNAi from './RNAi'
 import Entity from './Entity'
-import Overexpression from './Overexpression'
 import loadData from '../../../../services/loadData'
 
 const Phenotype = ({ WBid, tableType }) => {
   const [data, setData] = useState([])
 
   useEffect(() => {
-    loadData(WBid, tableType, true).then((json) => setData(json.data))
+    loadData(WBid, tableType, true).then((json) => {
+      console.log(json.data)
+      setData(json.data)
+    })
   }, [WBid, tableType])
 
   const showEntities = (value) => {
@@ -28,13 +30,9 @@ const Phenotype = ({ WBid, tableType }) => {
     if (value.RNAi) {
       return <RNAi rObj={value.RNAi} />
     } else {
-      console.error('hogehoge!!')
+      console.error(value)
       return null
     }
-    // rest-stagingの"Overexpression"用APIは今のところありません
-    // else {
-    //   return <Overexpression values={value} />
-    // }
   }
 
   const columns = useMemo(
@@ -42,6 +40,9 @@ const Phenotype = ({ WBid, tableType }) => {
       {
         Header: 'Phenotype',
         accessor: 'phenotype.label',
+        aggregate: 'count',
+        Aggregated: ({ value }) => `${value} Names`,
+        Cell: ({ cell: { value } }) => value,
       },
       {
         Header: 'Entities Affected',
@@ -49,6 +50,9 @@ const Phenotype = ({ WBid, tableType }) => {
         Cell: ({ cell: { value } }) => showEntities(value),
         disableFilters: true,
         sortType: 'sortByEntity',
+        aggregate: 'count',
+        Aggregated: () => null,
+        canGroupBy: false,
       },
       {
         Header: 'Supporting Evidence',
@@ -58,6 +62,9 @@ const Phenotype = ({ WBid, tableType }) => {
         filter: 'evidenceFilter',
         minWidth: 240,
         width: 540,
+        aggregate: 'count',
+        Aggregated: () => null,
+        canGroupBy: false,
       },
     ],
     []
